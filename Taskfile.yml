@@ -1,0 +1,19 @@
+version: "3"
+
+tasks:
+  hello:
+    cmds:
+      - echo 'Hello World from Task!'
+    silent: true
+
+  build:
+    cmds:
+      - go build -o miniprompt
+    silent: true
+
+  dev:
+    watch: true
+    sources:
+      - "**/*.go"
+    cmds:
+      - go run *.go
