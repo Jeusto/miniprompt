@@ -1,0 +1,6 @@
+[shell_prompt]
+prompt_symbol = "▲"
+
+[git_branch]
+symbol = ""
+disabled = true
