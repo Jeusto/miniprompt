@@ -57,7 +57,7 @@ func makePrompt(config Config) string {
 	if len(gitDir) > 0 {
 		repo, _ := git.PlainOpen(getGitDir())
 		return fmt.Sprintf(
-			"\n%s %s (%s %s)\n%s",
+			"\n%s %s (%s %s)\n%s ",
 			cyan(trimPath(cwd, home)),
 			gitBranchSym,
 			gitBranchOrSha(repo),
@@ -74,5 +74,5 @@ func makePrompt(config Config) string {
 
 func main() {
 	config := getConfig()
-	fmt.Println(makePrompt(config))
+	fmt.Print(makePrompt(config))
 }
