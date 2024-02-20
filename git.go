@@ -44,3 +44,17 @@ func gitStatus(repo *git.Repository) string {
 	}
 	return red("×")
 }
+
+func gitCountChangedFiles(repo *git.Repository) int {
+	worktree, _ := repo.Worktree()
+	status, _ := worktree.Status()
+
+	count := 0
+	for _, entry := range status {
+		if entry.Staging != git.Untracked {
+			count++
+		}
+	}
+
+	return count
+}

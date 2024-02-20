@@ -53,16 +53,18 @@ func makePrompt(config Config) string {
 	gitDir := getGitDir()
 	promptSym := config.ShellPrompt.PromptSymbol
 	gitBranchSym := config.GitBranchConfig.Symbol
+	gitChangedFileSym := "\uf040"
 
 	if len(gitDir) > 0 {
 		repo, _ := git.PlainOpen(getGitDir())
 		return fmt.Sprintf(
-			"\n%s %s (%s %s)\n%s ",
+			"\n%s %s %s %s %d\n%s ",
 			cyan(trimPath(cwd, home)),
 			gitBranchSym,
 			gitBranchOrSha(repo),
-			gitStatus(repo),
-			promptSym,
+			gitChangedFileSym,
+			gitCountChangedFiles(repo),
+			green(promptSym),
 		)
 	}
 	return fmt.Sprintf(
