@@ -14,9 +14,11 @@ const (
 )
 
 var (
-	red   = color("\033[31m%s\033[0m")
-	green = color("\033[32m%s\033[0m")
-	cyan  = color("\033[36m%s\033[0m")
+	red    = color("\033[31m%s\033[0m")
+	green  = color("\033[32m%s\033[0m")
+	cyan   = color("\033[36m%s\033[0m")
+	pink   = color("\033[35m%s\033[0m")
+	yellow = color("\033[33m%s\033[0m")
 )
 
 func color(s string) func(...interface{}) string {
@@ -26,25 +28,14 @@ func color(s string) func(...interface{}) string {
 }
 
 func trimPath(cwd, home string) string {
-	var path string
 	if strings.HasPrefix(cwd, home) {
-		path = "~" + strings.TrimPrefix(cwd, home)
-	} else {
-		// If path doesn't contain $HOME, return the
-		// entire path as is.
-		path = cwd
-		return path
+		cwd = "~" + strings.TrimPrefix(cwd, home)
 	}
-	items := strings.Split(path, "/")
-	truncItems := []string{}
-	for i, item := range items {
-		if i == (len(items) - 1) {
-			truncItems = append(truncItems, item)
-			break
-		}
-		truncItems = append(truncItems, item[:1])
+	items := strings.Split(cwd, "/")
+	for i := 0; i < len(items)-1; i++ {
+		items[i] = items[i][:1]
 	}
-	return filepath.Join(truncItems...)
+	return filepath.Join(items...)
 }
 
 func makePrompt(config Config) string {
@@ -53,25 +44,28 @@ func makePrompt(config Config) string {
 	gitDir := getGitDir()
 	promptSym := config.ShellPrompt.PromptSymbol
 	gitBranchSym := config.GitBranchConfig.Symbol
-	gitChangedFileSym := "\uf040"
+	lastExitCode := os.Getenv("EXIT_CODE")
+	lastExitCodeSym := ""
+	if lastExitCode != "0" {
+		lastExitCodeSym = red(fmt.Sprintf("%c %s", '\uf00d', lastExitCode))
+	}
 
+	prompt := fmt.Sprintf("\n%s\n%s", cyan(trimPath(cwd, home)), green(promptSym))
 	if len(gitDir) > 0 {
-		repo, _ := git.PlainOpen(getGitDir())
-		return fmt.Sprintf(
-			"\n%s %s %s %s %d\n%s ",
+		repo, _ := git.PlainOpen(gitDir)
+		gitChangedFileCount := fmt.Sprintf("%c %d", '\uf040', gitCountChangedFiles(repo))
+
+		prompt = fmt.Sprintf(
+			"\n%s %s %s %s %s\n%s ",
 			cyan(trimPath(cwd, home)),
-			gitBranchSym,
-			gitBranchOrSha(repo),
-			gitChangedFileSym,
-			gitCountChangedFiles(repo),
+			pink(gitBranchSym),
+			pink(gitBranchOrSha(repo)),
+			yellow(gitChangedFileCount),
+			lastExitCodeSym,
 			green(promptSym),
 		)
 	}
-	return fmt.Sprintf(
-		"\n%s\n%s",
-		cyan(trimPath(cwd, home)),
-		promptSym,
-	)
+	return prompt
 }
 
 func main() {
